@@ -1,3 +1,6 @@
+![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)
+
+This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE
 # Shoutout Creator
 
 This web application helps you create visually appealing shoutout codes for sharing your fiction on Royal Road.
@@ -35,3 +38,5 @@ This web application helps you create visually appealing shoutout codes for shar
 I plan to keep this project updated, although it is not yet fully efficient. It is heavily inspired by finitevoid's shoutout creator. I will continue to update it for a while.
 
 🚀If you find this project helpful, please consider giving it a star on GitHub✨ and contributing to its development. Your support and contributions are greatly appreciated!💪
+
+
