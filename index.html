@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Sets the character encoding for the document to UTF-8, which supports a wide range of characters. -->
+    <meta charset="UTF-8">
+    <!-- Configures the viewport for responsive design, making the site render well on different devices. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Links a favicon image to the webpage, displayed in the browser tab. -->
+    <link rel="icon" href="favicon.jpg" type="image/x-icon">
+    <!-- Sets the title of the webpage, which appears in the browser tab or window title bar. -->
+    <title>Shoutout Creator</title>
+    <!-- Imports several fonts from Google Fonts for use in the webpage. -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Raleway:wght@400;700&display=swap');
+
+    </style>
+    <!-- Includes the particles.js library from a CDN for creating animated particle backgrounds. -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+     <style>
+    /* Styles for the loading indicator overlay that covers the entire screen. */
+    .loading-overlay {
+        position: fixed; /* Full screen overlay */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Make sure it's on top */
+        display: none; /* Initially hidden */
+      }
+
+    /* Styles for the circular loading spinner. */
+    .lds-ring {
+       display: inline-block;
+       position: relative;
+        width: 80px;
+        height: 80px;
+        }
+     /* Styles for individual segments of the loading spinner. */
+        .lds-ring div {
+        box-sizing: border-box;
+        display: block;
+       position: absolute;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+         border: 8px solid #fff;
+        border-radius: 50%;
+          animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+         border-color: #fff transparent transparent transparent;
+       }
+      /* Animation delay for the first segment of the spinner. */
+      .lds-ring div:nth-child(1) {
+        animation-delay: -0.45s;
+    }
+    /* Animation delay for the second segment of the spinner. */
+    .lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+     }
+     /* Animation delay for the third segment of the spinner. */
+   .lds-ring div:nth-child(3) {
+      animation-delay: -0.15s;
+      }
+    /* Keyframes for the rotating animation of the loading spinner. */
+  @keyframes lds-ring {
+    0% {
+   transform: rotate(0deg);
+    }
+  100% {
+    transform: rotate(360deg);
+      }
+    }
+    /* Styles to hide the fetch/copy buttons and show the loading overlay when loading. */
+   .container.loading #fetchButton,
+   .container.copy-loading #copyButton{  /* For Copy Button */
+       visibility: hidden;  /*  hide the buttons*/
+   }
+    /* Styles to show the loading overlay during fetching or copying. */
+    .container.loading .loading-overlay,    /* show overlay */
+   .container.copy-loading .loading-overlay
+   {
+      display: flex;
+   }
+   /* Styles for the "Loading..." text displayed within the loading overlay. */
+   .loading-message {
+         color: white;
+     font-size: 1.2em;
+       margin-top: 10px; /* Spacing from the spinner */
+     }
+    /* Style of alert */
+     .alert-box{
+     grid-area: title;
+    position: absolute;
+    top:2%;
+    width:90%;
+    max-width:800px;
+     padding:10px 20px;
+     border-radius:5px;
+    text-align: center;
+   background-color:#ffcccc;
+     border: 1px solid #ff0000;
+    color:#ff0000;
+   }
+    /* styles for sucess  */
+   .success-alert {
+        grid-area: copy;
+         width: fit-content;
+        justify-self: center;
+         padding: 10px 20px;
+          border-radius: 25px;
+      text-align: center;
+    background-color: #c5f0cb;
+       border: 1px solid #479c53;
+          color: #479c53;
+       }
+
+
+    /* Styles for the main body of the page, setting background, font, and layout. */
+       body {
+            font-family: 'Roboto', sans-serif; /* Default font */
+            background: radial-gradient(circle at center, #0a2e38 0%, #000000 70%); /* Radial gradient background */
+            color: #b0e2ff; /* Light blue text color */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* Centers content horizontally */
+            align-items: center; /* Centers content vertically */
+            min-height: 100vh; /* Ensures the content takes at least the full viewport height */
+            overflow-x: hidden; /* Prevents horizontal scrolling */
+            zoom: 80%; /* Slightly zooms out the entire page */
+            perspective: 1000px;  /*3d effect*/
+        }
+    /* Styles for both the content and title font selection dropdowns. */
+      .font-select, .title-font-select { /* Style both selects */
+            background-color: rgba(10, 46, 56, 0.8);
+            border: 1px solid rgba(10, 46, 56, 0.8);
+            padding: 5px;
+            font-size: 16px;
+        }
+
+    /* Styles for the individual options within the font selection dropdowns. */
+      .font-select option, .title-font-select option{
+             background-color: rgba(10, 46, 56, 0.8);
+           color: rgb(255, 255, 255);
+        }
+        /* Styles for the main container, setting background, layout, and responsive grid areas. */
+        .container {
+            background: rgba(10, 46, 56, 0.8); /* Semi-transparent dark background */
+            border-radius: 25px; /* Rounded corners */
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7); /* Subtle shadow */
+            top:40px;
+            padding: 30px; /* Inner spacing */
+            width: 90%;
+            max-width: 800px;
+            text-align: center; /* Centers text content */
+            position: relative;
+            overflow: hidden; /* Hides any overflowing content */
+            backdrop-filter: blur(10px); /* Adds a blur effect to the background */
+            transform-style: preserve-3d;/*3d effect*/
+             /* Defines the grid layout for responsive design */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto auto;
+            grid-template-areas:
+                "title title"
+                "inputs controls"
+                "preview preview"
+                "copy copy";
+            gap: 20px;
+        }
+
+        /* Styles for the main heading (h1). */
+        h1 {
+            font-family: 'Impact', sans-serif; /*Default Title Font */
+            font-size: 5em;
+            margin-bottom: 0.2em;
+            color: #ffcc00; /* Yellow color */
+            text-shadow: 0 0 15px rgba(255, 204, 0, 0.8); /* Text shadow for emphasis */
+            transform: translateZ(50px);
+            grid-area: title;  /*Places in grid title area */
+        }
+
+        /* Styles for each input group (label + input field). */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            position: relative;
+            width: 100%;
+        }
+
+    /* Styles for label */
+        label {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 0.9em;
+            color: #88c4ff; /* Light blue color */
+            pointer-events: none; /* Makes the label non-interactive */
+             /* Transitions for smooth animation of label movement and style changes */
+            transition: transform 0.3s ease, font-size 0.3s ease, color 0.3s ease;
+            transform-origin: top left;  /*Set orifin*/
+            background: linear-gradient(to right, rgba(10, 46, 56, 0.8), rgba(10, 46, 56, 0));/*gradient */
+            padding-right: 5px;/*Padding*/
+        }
+
+     /* Styles for URL, text, and textarea input fields. */
+        input[type="url"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px; /* Rounded corners */
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white background */
+            color: #fff; /* White text color */
+            font-size: 1em;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); /* Subtle shadow */
+              /* Transitions for smooth animation of input field interactions */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transform: translateZ(20px);/* 3d effect*/
+            box-sizing: border-box;/* prevent it exceeding its container */
+        }
+
+    /* Styles for when input fields are focused or have content. */
+        input:focus+label,
+        input:not(:placeholder-shown)+label,
+        textarea:focus+label,
+        textarea:not(:placeholder-shown)+label {
+            transform: translateY(-25px) scale(0.8);
+            color: #ffcc00;/*yellow*/
+            font-weight: bold;
+        }
+    /* styles for textarea*/
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+    /* Styles for the scrollbar in the textarea. */
+        textarea::-webkit-scrollbar {
+            width: 8px; /* Width of the scrollbar */
+        }
+
+    /* Styles for the scrollbar track in the textarea. */
+        textarea::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3); /* Slightly transparent black background */
+            border-radius: 10px;
+        }
+
+    /* Styles for the scrollbar thumb (the draggable part) in the textarea. */
+        textarea::-webkit-scrollbar-thumb {
+            background: linear-gradient(#b0e2ff, #88c4ff);
+            border-radius: 10px;
+        }
+
+    /* Styles for when the scrollbar thumb is hovered over in the textarea. */
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #ffcc00; /* Yellow color */
+        }
+
+       /* General styles for all buttons on the page. */
+        button {
+            background: linear-gradient(135deg, #ffcc00, #b0e2ff); /* Gradient background */
+            color: #0a2e38;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px; /* Rounded corners */
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer; /* Changes the cursor to a pointer on hover */
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+            transition: all 0.3s ease; /*smooth animations for changes*/
+            position: relative;
+            overflow: hidden;  /*Clip the ripple*/
+            z-index: 1;/*button will always remain above other element*/
+            transform: translateZ(30px);/* 3d effetc*/
+        }
+
+     /* Creates a pseudo-element (::before) for a subtle background effect on buttons. */
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.15);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: right;  /*Transform the befin from right*/
+            transition: transform 0.5s ease; /*smooth aniamtions*/
+        }
+
+    /* Styles for the button on hover, making the pseudo-element expand. */
+        button:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+      /* Styles to make the button's shadow more pronounced on hover. */
+        button:hover {
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.9);
+        }
+       /*styles of ripple effect class  */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-effect 0.6s linear;
+            pointer-events: none;/*makes span non interactive */
+        }
+
+        /* Keyframes for the ripple effect animation. */
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4); /* Expand to 4 times its original size */
+                opacity: 0;  /*fade away*/
+            }
+        }
+
+    /* Styles for the container holding the color picker inputs. */
+        .color-selectors {
+            display: flex;
+            flex-wrap: wrap; /* Allows items to wrap to the next line */
+            justify-content: flex-start;
+            gap: 10px; /* Spacing between color pickers */
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+       /* Styles for each individual color picker container. */
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    /*for moving span in color picker infront of the color input field  */
+        .color-picker span {
+            order: -1; /* Moves the span element to before input type color*/
+        }
+
+        /* Styles for the color input fields. */
+        input[type="color"] {
+            appearance: none;
+            -webkit-appearance: none;  /*remove default styles for webkit browser */
+            width: 50px;
+            height: 50px;
+            border: 3px solid #b0e2ff; /* Light blue border */
+            border-radius: 50%;
+            cursor: pointer;
+            background-image: linear-gradient(45deg, #ffcc00 25%, transparent 25%, transparent 75%, #ffcc00 75%),
+                linear-gradient(45deg, #ffcc00 25%, transparent 25%, transparent 75%, #ffcc00 75%);
+            background-size: 15px 15px;
+            background-position: 0 0, 7.5px 7.5px;/* Adjust positioning of linear gradient lines */
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 0 10px rgba(176, 226, 255, 0.5); /* Initial box shadow */
+        }
+
+      /* Styles for the color input on hover and focus. */
+        input[type="color"]:hover,
+        input[type="color"]:focus {
+            transform: scale(1.1); /* Slightly enlarge the picker */
+            box-shadow: 0 0 20px rgba(176, 226, 255, 0.8);
+        }
+    /* Remove padding form default inout type  */
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+     /* Styles for the color swatch in WebKit-based browsers (Chrome, Safari). */
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        /* Styles for the color swatch in Mozilla Firefox. */
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+    /* Styles for the 'controls' section which holds font selection, image placement, etc. */
+        .controls {
+            grid-area: controls;  /*place this area to the conrols section*/
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+            border: 2px solid rgba(176, 226, 255, 0.5);
+            border-radius: 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        /*margin bottom of the all elements  */
+        .control-group {
+            margin-bottom: 15px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /*create space between them */
+        }
+    /* Style label inside each of the group  */
+        .control-group label {
+            position: static;  /*removes absolute positioing*/
+            margin-right: 10px;
+            margin-bottom: 0px; /*resets */
+        }
+      /* styles for class fontselect  and title font select  */
+          .font-select,
+          .title-font-select {
+            padding: 8px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid #555;
+             font-family: inherit; /* Important for consistent font */
+          }
+            /* styles for class fontselect  and title font select when get focued */
+        .font-select:focus, .title-font-select:focus {
+           border-color:#ffcc00;  /*chagen color */
+           outline:none;/* remove default  outline */
+
+          }
+        /*styles image-placement buttons group   */
+        .image-placement {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+     /* Style individual placement buttons inside class  image-placement   */
+        .image-placement button {
+            background: none;
+            color: #b0e2ff;
+            border: 1px solid #b0e2ff;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+     /* when clicked makes them appers as slected  */
+        .image-placement button.active,
+        .image-placement button:hover {
+            background-color: #b0e2ff;
+            color: #0a2e38;
+        }
+
+    /* styles for buttons inside text-align class   */
+        .text-align {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        /*styles each buttons inside text-align   */
+        .text-align button {
+            background: none;
+            color: #b0e2ff;
+            border: 1px solid #b0e2ff;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    /* Styles for the text alignment buttons when active or hovered. */
+        .text-align button.active,
+        .text-align button:hover {
+            background-color: #b0e2ff;
+            color: #0a2e38;
+        }
+
+     /* Styles for the preview area where the generated shoutout is displayed. */
+        #preview {
+            grid-area: preview;
+            border: 3px dashed #88c4ff;
+            border-radius: 20px;
+            margin-top: 0px;
+            transition: background-color 0.3s ease, color 0.3s ease; /*adds smoothness*/
+            min-height: 120px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: transparent; /* No default background */
+        }
+      /* styles to show previews when are gets populated  */
+        #preview.populated {
+            display: flex;/* Makes it visible */
+            padding: 20px;
+        }
+
+      /* styles for heading two inside id preview  */
+        #preview h2 {
+           font-family: 'Roboto', sans-serif; /*Default Title Font*/
+            margin-top: 0;/* removes default top margin */
+            margin-bottom: 0.8em;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7); /*glow efect*/
+        }
+
+     /* Styles for the desktop and mobile preview containers. */
+        #preview-desktop,
+        #preview-mobile {
+            border: 1px solid #555;
+            border-radius: 10px;
+            background-color: transparent;
+            margin-top: 10px;
+            width: 1200px;
+            max-width: 90%; /* Ensure responsiveness */
+            overflow-x: auto; /* Adds horizontal scroll if content overflows */
+            margin: 10px auto; /* Centers the preview container */
+            padding: 10px
+        }
+    /* width for previe in mobile */
+        #preview-mobile {
+            width: 600px;
+        }
+
+    /* Displays the desktop preview by default. */
+        #preview-desktop {
+            display: block;
+        }
+
+       /* Hides the mobile preview by default. */
+        #preview-mobile {
+            display: none;
+        }
+
+    /* Styles for the "Copy to Clipboard" button. */
+        #copyButton {
+            grid-area: copy;  /* palces in specified location in grid  */
+            margin-top: 10px;
+            align-self: center;/*centers  button vertically */
+        }
+
+      /* styles for the section holding input*/
+        .inputs {
+            grid-area: inputs;  /*Position into inouts gri area */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-right: 20px;
+        }
+
+     /* Styles for the preview image within the preview area. */
+        .preview-image {
+            max-width: 100px;
+            height: auto;
+        }
+
+       /* Media query for smaller screens (max-width: 768px). */
+        @media (max-width: 768px) {
+            /* Adjusts the container layout for smaller screens, stacking items vertically. */
+            .container {
+                padding: 20px;
+                grid-template-columns: 1fr;  /*one colimn only  */
+                 /*change arrangement in one col  */
+                grid-template-rows: auto auto auto auto auto;
+                grid-template-areas:
+                    "title"
+                    "inputs"
+                    "controls"
+                    "preview"
+                    "copy";
+            }
+            /* Reduces font of h1 */
+            h1 {
+                font-size: 3em;
+            }
+            /* Removes righ tpadidng for small devices  */
+            .inputs {
+                padding-right: 0px;
+            }
+
+            /*margin bott for the class  */
+            .input-group {
+                margin-bottom: 20px;
+            }
+
+        /* input, buttons padding ,font size */
+            input[type="url"],
+            input[type="text"],
+            textarea,
+            button {
+                font-size: 0.9em;
+                padding: 12px;
+
+            }
+
+        /* sets to take maximum width available*/
+            #preview-desktop,
+            #preview-mobile {
+                width: 90%;
+            }
+             /* Changes  previwe with 200*/
+            #preview-mobile {
+                width: 200px;
+            }
+
+        }
+
+    /* Styles for the particles.js background. */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;/* Makes it background*/
+            pointer-events: none;/* Non Interactive*/
+        }
+
+    /* Style class mobile and desktp button with magin  */
+        #desktopBtn,
+        #mobileBtn {
+            margin-left: 0.3125rem;
+            margin-top: 0.625rem;
+        }
+
+    /* sets images within priview with 100% maximum with respect to their containers  */
+        #preview img {
+            max-width: 100px;
+            height: auto;
+
+        }
+
+      /* width: 100%,  for mobile div container which will take maximum space*/
+        #preview-mobile .text-container {
+            width: 100%;
+            box-sizing: border-box; /*prevents them exciding its allocated  space*/
+        }
+        /* Remove extra space around mobile */
+        #preview-mobile img {
+            margin: 0;
+        }
+
+    /* Clears floats using clear property  */
+        #preview-mobile>div::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        /* places the title-color to make full with */
+        .color-selectors .color-picker:nth-child(3){
+              grid-column: 1 / span 2; /* Stretches to take full widt */
+             width:100%;
+            justify-content: center;  /*Centers its content horizontally*/
+
+        }
+
+    </style>
+</head>
+
+<body>
+     <!-- Creates a canvas for the particles.js animation. -->
+    <div id="particles-js"></div>
+       <!-- alert Div -->
+        <div id="alertBox" class = "alert-box" style="display: none;"></div>
+        <!-- Sucess alert box, hidden by defualts.  -->
+        <div id ="successAlert" class = "success-alert" style="display:none;"> Copied Successfully</div>
+     <div class="container">
+           <!-- Div of Over Lay-->
+           <div class="loading-overlay">
+            <!-- Creates animated spinner during loading  -->
+             <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+             <!-- Displays messages  -->
+             <div class="loading-message">Loading...</div>
+           </div>
+
+        <!-- Main heading of the application. -->
+        <h1>Shoutout Creator</h1>
+
+      <!--start Input fiels group -->
+        <div class="inputs">
+             <!-- Input groups -->
+               <div class="input-group">
+                <br>
+                <!-- Input field for entering the fiction URL. -->
+                <input type="url" id="urlInput" placeholder=" ">
+                <!-- Label for the fiction URL input field. -->
+                <label for="urlInput">Enter Fiction URL</label>
+            </div>
+              <!-- Button to trigger fetching data from the provided URL. -->
+            <button id="fetchButton">Fetch Data</button>
+            <br>
+               <!--url  group input  -->
+            <div class="input-group">
+                <br>
+                 <!-- Input field for entering the cover image URL. -->
+                <input type="url" id="coverImageUrl" placeholder=" ">
+                <!-- Label for the cover image URL input field. -->
+                <label for="coverImageUrl">Embed Cover Link (URL)</label>
+            </div>
+
+               <!--title group   -->
+            <div class="input-group">
+                <br>
+                  <!-- Input field for entering the fiction title. -->
+                <input type="text" id="fictionTitle" placeholder=" ">
+                 <!-- Label for the fiction title input field. -->
+                <label for="fictionTitle">Fiction Title</label>
+            </div>
+            <!--desc input -->
+            <div class="input-group">
+                <br>
+                <!-- Textarea for entering the fiction description (supports HTML). -->
+                <textarea id="fictionDescription" rows="5" placeholder=" "></textarea>
+                <!-- Label for the fiction description textarea. -->
+                <label for="fictionDescription">Fiction Description (HTML)</label>
+            </div>
+
+
+             <!-- Button to copy the generated HTML to the clipboard. -->
+            <button id="copyButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
+                    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
+                </svg>
+                Copy to Clipboard
+            </button>
+        </div>
+
+
+         <!--start controls   -->
+        <div class="controls">
+           <!-- Color pickers for background, text, and title colors. -->
+             <div class="color-selectors" style="display: flex; align-items: center; gap: 1rem; z-index: 10;">
+               <!-- indiv col picker cont -->
+                <div class="color-picker" style="display: flex; align-items: center; gap: 0.5rem;">
+                     <!-- Label for the background color picker. -->
+                    <span>Background Color</span>
+                      <!-- Input field for selecting the background color. -->
+                    <input type="color" id="bgColor" value="#ffffff">
+                </div>
+                 <!--container color picker two -->
+                <div class="color-picker" style="display: flex; align-items: center; gap: 0.5rem;">
+                     <!-- Label for the text color picker. -->
+                    <span>Text Color</span>
+                    <!-- Input field for selecting the text color. -->
+                    <input type="color" id="textColor" value="#000000">
+                </div>
+                 <!--container color pic three-->
+                <div class="color-picker" style="display: flex; align-items: center; gap: 0.5rem;">
+                     <!-- Label for the title color picker. -->
+                    <span>Title Color</span>
+                      <!-- Input field for selecting the title color. -->
+                    <input type="color" id="titleColor" value="#000000">
+                </div>
+            </div>
+
+
+
+                <!--container each one has  lable and dropdown select    -->
+            <div class="control-group">
+                 <!-- Label for the content font selection. -->
+                <label for="fontSelect">Content Font:</label>
+                <!-- Dropdown for selecting the content font. -->
+                <select id="fontSelect" class="font-select">
+                   <option value="'Roboto', sans-serif">Roboto</option>
+                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                    <option value="'Lato', sans-serif">Lato</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Raleway', sans-serif">Raleway</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    </select>
+                    </div>
+                    <!-- lable and selection to selct title fonts. -->
+                    <div class="control-group">
+                    <!-- Label for the title font selection. -->
+                    <label for="titleFontSelect">Title Font:</label>
+                    <!-- Dropdown for selecting the title font. -->
+                    <select id="titleFontSelect" class="title-font-select">
+                    <option value="'Roboto', sans-serif">Roboto</option>
+                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                    <option value="'Lato', sans-serif">Lato</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Raleway', sans-serif">Raleway</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Courier New', monospace">Courier New</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    </select>
+                    </div>
+                    <!-- group to places images with respect to the contents -->
+                    <div class="control-group">
+                    <!-- Label for image placement options. -->
+                    <label>Image Placement:</label>
+                    <!--buttons for selecting where -->
+                    <div class="image-placement">
+                    <!-- Button for placing the image at the top. -->
+                    <button data-placement="top">Top</button>
+                    <!-- Button for placing the image on the left. -->
+                    <button data-placement="left">Left</button>
+                    <!-- Button for placing the image on the right. -->
+                    <button data-placement="right">Right</button>
+                    <!-- Button for placing the image at the bottom. -->
+                    <button data-placement="bottom">Bottom</button>
+                    </div>
+                    </div>
+                    <!-- A text-align tag with 3 button left,center and righ -->
+                    <div class="control-group">
+                    <!-- Label for text alignment options. -->
+                    <label>Text Alignment:</label>
+                    <!--buttons for selecting alignment -->
+                    <div class="text-align">
+                    <!-- Button for aligning text to the left. -->
+                    <button data-align="left">Left</button>
+                    <!-- Button for centering text. -->
+                    <button data-align="center">Center</button>
+                    <!-- Button for aligning text to the right. -->
+                    <button data-align="right">Right</button>
+                    </div>
+                    </div>
+                    <!--container consist of label and buttons for previwing -->
+                    <div class="control-group">
+                    <!-- Label for preview mode selection. -->
+                    <label>Preview Mode:</label>
+                    <div>
+                    <!-- Button for displaying the desktop preview. -->
+                    <button id="desktopBtn">Desktop</button>
+                    <!-- Button for displaying the mobile preview. -->
+                    <button id="mobileBtn">Mobile</button>
+                </div>
+
+            </div>
+    
+        </div>
+    
+         <!-- Preview container that holds both desktop and mobile previews. -->
+        <div id="preview">
+            <!-- Container for the desktop preview. -->
+            <div id="preview-desktop"></div>
+              <!-- Container for the mobile preview. -->
+            <div id="preview-mobile"></div>
+        </div>
+    
+    </div>
+    <script>
+        // Configures and initializes the particles.js library with specific settings for the background animation.
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#b0e2ff" },
+                "shape": { "type": "circle", "stroke": { "width": 0, "color": "#000000" } },
+                "opacity": { "value": 0.5, "random": true, "anim": { "enable": false, "speed": 1, "opacity_min": 0.1, "sync": false } },
+                "size": { "value": 3, "random": true, "anim": { "enable": false, "speed": 40, "size_min": 0.1, "sync": false } },
+                "line_linked": { "enable": true, "distance": 150, "color": "#b0e2ff", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false, "attract": { "enable": false, "rotateX": 600, "rotateY": 1200 } }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": { "onhover": { "enable": false, "mode": "repulse" }, "onclick": { "enable": false, "mode": "push" }, "resize": true },
+            },
+            "retina_detect": true
+        });
+        //------JAVASCRIPT -------//
+// Asynchronous function to extract metadata from a given URL.
+async function extractMetadata(url) {
+try {
+// Use a CORS proxy
+const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+const response = await fetch(proxyUrl);
+if (!response.ok) {
+        throw new Error(`Proxy request failed with status: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // IMPORTANT: Check if 'contents' exists AND is a string.
+    if (!data || !data.contents || typeof data.contents !== 'string') {
+         throw new Error("Invalid response from proxy: 'contents' missing or not a string.");
+     }
+
+
+    const htmlContent = data.contents;
+        // Parse the HTML content.
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html'); // text/html is the correct type
+
+    const metadata = {};
+
+    // --- 1. Try ld+json ---
+    const scriptTag = doc.querySelector('script[type="application/ld+json"]');
+     // If ld+json data is found, try to parse it.
+    if (scriptTag) {
+        try {
+            const jsonData = JSON.parse(scriptTag.textContent);
+             // Extract title, description, and cover image URL from the JSON data.
+            metadata.title = jsonData.name;
+            metadata.blurb = jsonData.description;
+            //chekc if data is image or url and stores based on data type
+            const image_url = jsonData.image
+            if (typeof image_url === 'object' && image_url !== null && 'url' in image_url) {
+                metadata.cover = image_url.url;
+            }
+            else if (typeof image_url === 'string') {
+                metadata.cover = image_url;
+            }
+            else {
+                metadata.cover = null
+            }
+
+            return metadata; // Successful, so return.
+        } catch (jsonError) {  //cathes if JSON is malformed
+            console.error("JSON parsing error (ld+json):", jsonError);
+            // Don't return; fall back to other methods.
+        }
+    }
+
+        //If title from json data then tries to gets other way
+
+    if (!metadata.title) {
+        const titleTag = doc.querySelector('title');
+        metadata.title = titleTag ? titleTag.textContent.trim() : null;
+    }
+
+    //  If title cover is  from json data then tries to gets other way
+
+    if (!metadata.cover) {
+        const imageTag = doc.querySelector('meta[property="og:image"]');
+        metadata.cover = imageTag ? imageTag.content : null;
+    }
+       //Extract blurb des
+    if (!metadata.blurb) {
+        const descriptionDivs = doc.querySelectorAll('div.description');
+        let descriptionText = "";
+        for (const div of descriptionDivs) {  //loops and concatnates each
+            descriptionText += div.textContent.trim() + " ";
+        }
+        metadata.blurb = descriptionText.trim() || null; // Ensure blurb is null if empty.
+    }
+
+    return metadata;
+
+} catch (error) {   //catch and display error messages
+    console.error("Error fetching or parsing URL:", error);
+    // Use the showMessage function for user-friendly error reporting
+    showMessage(`Error: Could not fetch data from ${url}. Please check the URL and try again.  Details: ${error.message}`, true);
+    return null;  //returning NUll is the crucial
+}
+}
+// Asynchronous function to reduce the size of an image using a proxy.
+async function reduceImageSize(imageUrl) {
+    if (!imageUrl) return ""; // Handles case image empty
+    try {
+    const encodedImageUrl = encodeURIComponent(imageUrl);  //Encode properly for a URL
+    const weservUrl = `https://images.weserv.nl/?url=${encodedImageUrl}&w=300&q=75&output=json`;  //form correct URL
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(weservUrl)}`;  //wrap again correct proxy URL.
+
+    const response = await fetch(proxyUrl);
+
+    if (!response.ok) {
+        console.error("Image resize failed (weserv.nl, via proxy):", response.status, response.statusText);
+        return imageUrl; // Return original URL on failure
+    }
+
+    const data = await response.json();
+    //VERY IMPORTANT, check if data.contents exist
+      if (!data || !data.contents || typeof data.contents !== 'string') {
+         console.error("Invalid response from weserv.nl proxy: 'contents' missing or not a string.");
+          return imageUrl
+     }
+
+    const parsedResizeData = JSON.parse(data.contents);  // This was the likely error.
+      //check also url.
+    if(!parsedResizeData || !parsedResizeData.url){
+          console.error("weserv did not return an image")
+          return imageUrl
+      }
+
+    console.log("weserv.nl response:", parsedResizeData); // Log *everything* weserv.nl sends
+    return parsedResizeData.url;
+
+
+} catch (error) { // If any other error occurs, log it and return the original URL.
+    console.error("Error reducing image:", error);
+    return imageUrl; // Return original URL on any error
+}
+}
+// Function to show a message to the user, styled as an alert.
+function showMessage(message, isError = false) {
+      const alertBox = document.getElementById('alertBox');
+        alertBox.textContent = message;
+        //changes background and colors for error
+      alertBox.style.backgroundColor = isError ? '#ffcccc' : '#ccffcc'; // Red for error, Greenish for others
+       alertBox.style.color = isError ? '#ff0000' : '#006600';
+       alertBox.style.display = 'block';
+
+
+   }
+
+
+    // Function to hide  message .
+   function hideMessage(){ // To hide after copy
+        const successAlert = document.getElementById('successAlert');
+            successAlert.style.display="none";
+    }
+
+    //shows sucess message when text are copied sucessfully
+   function showSucessMessage(message){
+     const successAlert = document.getElementById('successAlert');
+           successAlert.textContent = message;
+       successAlert.style.display ="block";
+    }
+
+
+
+// Set up event listeners after the DOM is fully loaded.
+    document.addEventListener('DOMContentLoaded', () => {
+         // Get references to all the necessary DOM elements.
+        const fetchButton = document.getElementById('fetchButton');
+        const urlInput = document.getElementById('urlInput');
+        const coverImageUrlInput = document.getElementById('coverImageUrl');
+        const fictionTitleInput = document.getElementById('fictionTitle');
+        const bgColorInput = document.getElementById('bgColor');
+        const textColorInput = document.getElementById('textColor');
+        const titleColorInput = document.getElementById('titleColor');
+        const fictionDescriptionInput = document.getElementById('fictionDescription');
+        const previewDesktop = document.getElementById('preview-desktop');
+        const previewMobile = document.getElementById('preview-mobile');
+        const copyButton = document.getElementById('copyButton');
+        const fontSelect = document.getElementById('fontSelect');
+        const titleFontSelect = document.getElementById('titleFontSelect');
+        const imagePlacementButtons = document.querySelectorAll('.image-placement button');
+        const textAlignButtons = document.querySelectorAll('.text-align button');
+        const desktopBtn = document.getElementById('desktopBtn');
+        const mobileBtn = document.getElementById('mobileBtn');
+
+        let currentImagePlacement = 'left';  //initial place and text are set to left
+        let currentTextAlign = 'left';
+        let fictionUrl = '';  // Keep track of the URL.
+        let hasFetchedData = false; // Important for preview update.
+
+          // Helper function to add a ripple effect to buttons when clicked.
+        function addRippleEffect(button, event) {
+            const rect = button.getBoundingClientRect(); // Get the button size
+
+            // Calculate the position of the click relative to the button.
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+                // Create a span element for the ripple effect.
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            //position to x and y inside button
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            button.appendChild(ripple);  //apend this ripple as child in the button
+
+            // Remove the ripple element after the animation completes.
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+        //event listensers of different butons
+        fetchButton.addEventListener('click', (event) => {
+            addRippleEffect(fetchButton, event); // Corrected call
+            fetchData(); // Then call fetchData *after* ripple
+        });
+        copyButton.addEventListener('click', (event) => {
+            addRippleEffect(copyButton, event);
+             hideMessage(); //Hides prev messages
+            copyHtmlToClipboard();  // copy generated content to copy clip board
+
+        });
+          // Event listener for the desktop preview button.
+        desktopBtn.addEventListener('click', function() {
+            addRippleEffect(desktopBtn, event);
+            previewDesktop.style.display = 'block'; //shows des preview
+            previewMobile.style.display = 'none'; //hides
+            desktopBtn.classList.add('active');  //marks buttons as clicked/selected
+            mobileBtn.classList.remove('active');
+            if (!hasFetchedData) {  //checks for empty condition
+                return; // Don't try to update if data not fetched yet.
+            }
+            updatePreview(); // Moved inside click event handler
+
+        });
+
+         // Event listener for the mobile preview button.
+        mobileBtn.addEventListener('click', function() {
+            addRippleEffect(mobileBtn, event);
+            previewDesktop.style.display = 'none';
+            previewMobile.style.display = 'block';
+            mobileBtn.classList.add('active');
+            desktopBtn.classList.remove('active');
+            if (!hasFetchedData) { //chcks if data has fetched before loading
+                return; // Don't try to update if data not fetched yet.
+            }
+            updatePreview(); // Moved inside click event handler
+        });
+        // Input event listeners (update preview immediately) //updates on fly
+        bgColorInput.addEventListener('input', updatePreview);
+        textColorInput.addEventListener('input', updatePreview);
+        titleColorInput.addEventListener('input', updatePreview);
+        fictionTitleInput.addEventListener('input', updatePreview);
+        fictionDescriptionInput.addEventListener('input', updatePreview);
+        coverImageUrlInput.addEventListener('input', updatePreview);
+        fontSelect.addEventListener('change', updatePreview);
+        titleFontSelect.addEventListener('change', updatePreview);
+
+
+           // Event listeners for image placement buttons.
+        imagePlacementButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                addRippleEffect(button, event);  // Ripple Effect
+                imagePlacementButtons.forEach(btn => btn.classList.remove('active')); // Remove 'active'
+                this.classList.add('active');   //adds class
+                currentImagePlacement = this.dataset.placement; //data attribute holds info image position
+                updatePreview(); // No need to check hasFetchedData, can place images before.
+            });
+        });
+
+        // Event listeners for text alignment buttons.
+        textAlignButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                addRippleEffect(button, event);
+                textAlignButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                currentTextAlign = this.dataset.align;   //  Data align set current text alginment
+                updatePreview(); // Can align without fetched data
+            });
+        });
+
+
+
+           // Function to update the preview based on user input.
+        async function updatePreview() {
+           if (!hasFetchedData) { // Check for necessary condition: have we fetched any data to show
+             return;
+           }
+
+    const title = fictionTitleInput.value;
+    const description = fictionDescriptionInput.value;
+
+    // 1. Log the ORIGINAL cover URL *before* resizing
+    console.log("Original cover URL (from input):", coverImageUrlInput.value.trim());
+
+    const coverUrl = await reduceImageSize(coverImageUrlInput.value.trim());
+
+    // 2. Log the RESIZED cover URL
+    console.log("Resized cover URL (from reduceImageSize):", coverUrl);
+
+
+    const bgColor = bgColorInput.value;  // Extract value,not inline css value.
+    const textColor = textColorInput.value;
+    const titleColor = titleColorInput.value;
+    const selectedFont = fontSelect.value; //from selected dropdown
+    const selectedTitleFont = titleFontSelect.value;
+     preview.style.backgroundColor = bgColor;
+
+      // Create a link only around the *title text*, not the entire H2.
+    const titleLinkStart = fictionUrl ? `<a href="${fictionUrl}" target="_blank" style="color: inherit; text-decoration: none;" onclick="event.stopPropagation()">` : '';
+    const titleLinkEnd = fictionUrl ? `</a>` : '';
+    const imageLinkStart = fictionUrl ? `<a href="${fictionUrl}" target="_blank" onclick="event.stopPropagation()">` : '';
+    const imageLinkEnd = fictionUrl ? `</a>` : '';
+
+    let desktopContent = ""; // intialize as empty
+    let mobileContent = ""; // intialize
+
+    // 3. Verify imgStyle (should be consistent) and imgHtml *before* injection
+    const imgStyle = `height: auto; border-radius: 15px; box-shadow: 0 8px 25px rgba(0, 180, 255, 0.6); margin-bottom: 10px;  display: block;`; // Re-integrated style
+     const imgHtml = coverUrl ? `${imageLinkStart}<img src="${coverUrl}" style="${imgStyle}" class="preview-image">${imageLinkEnd}` : '';
+     console.log("Generated imgHtml:", imgHtml);  // VERY IMPORTANT
+
+    const textContainerStyle = `padding:15px;` //contains general stles for class
+
+     // Rest is unchanged. No need to change, issue not on logic of rendering based on side
+    if (currentImagePlacement === 'top' || currentImagePlacement === 'bottom') {  //logic based on vertical or horizontal placements
+
+         const sharedContent = `
+          ${currentImagePlacement === 'top' ? imgHtml : ''}
+           <div style = "${textContainerStyle}">
+              <h2 style="margin-top: 0.5em; margin-bottom: 0.2em; cursor: pointer; font-family: ${selectedTitleFont}; color: ${titleColor};">${titleLinkStart}${title}${titleLinkEnd}</h2>
+            <p>${description}</p>
+          </div>
+         ${currentImagePlacement === 'bottom' ? imgHtml : ''}
+          `;
+
+
+       desktopContent = `<div style="background-color: ${bgColor}; color: ${textColor}; font-family: ${selectedFont}; text-align: ${currentTextAlign}; padding: 10px; display: flex; flex-direction:column;">${sharedContent}</div>`;
+
+       mobileContent = `<div style="background-color: ${bgColor}; color: ${textColor}; font-family: ${selectedFont}; text-align: ${currentTextAlign}; padding: 10px; display: flex; flex-direction:column; ">${sharedContent}</div>`
+
+
+   } else { // Left or Right
+
+       const imageHtmlDesktop = coverUrl  //variable contians htmle code to embed on different device preview.
+              ? `${imageLinkStart}<img src="${coverUrl}" style="${imgStyle}; margin-right: ${currentImagePlacement === 'left' ? '10px' : '0'}; margin-left: ${currentImagePlacement === 'right' ? '10px' : '0'};  float:${currentImagePlacement};" class="preview-image">${imageLinkEnd}`
+                    : '';
+                const imageHtmlMobile = coverUrl
+                    ? `${imageLinkStart}<img src="${coverUrl}" style="${imgStyle};" class="preview-image">${imageLinkEnd}`
+                    : '';
+
+        desktopContent = `
+          <div style="background-color: ${bgColor}; color: ${textColor}; font-family: ${selectedFont}; text-align: ${currentTextAlign};  display: flex; flex-direction: ${currentImagePlacement === 'right' ? 'row-reverse' : 'row'};">
+             ${imageHtmlDesktop}
+          <div style = "${textContainerStyle}">
+               <h2 style="margin-top: 0; margin-bottom: 0.2em; cursor:pointer; font-family: ${selectedTitleFont}; color: ${titleColor};">${titleLinkStart}${title}${titleLinkEnd}</h2>
+              <p>${description}</p>
+            </div>
+
+          </div>
+          `;
+
+      mobileContent = `
+            <div style="background-color: ${bgColor}; color: ${textColor}; font-family: ${selectedFont}; text-align: ${currentTextAlign}; padding: 10px; display: flex; flex-direction: column; ">
+            ${imageHtmlMobile}
+           <div class = "text-container" style = "${textContainerStyle}">
+               <h2 style="margin-top: 0em; margin-bottom: 0.2em; cursor: pointer; font-family: ${selectedTitleFont}; color: ${titleColor};">${titleLinkStart}${title}${titleLinkEnd}</h2>
+                <p >${description}</p>
+            </div>
+         </div>`;
+
+  }
+
+   previewDesktop.innerHTML = desktopContent; //finally set
+  previewMobile.innerHTML = mobileContent; //finally set conetnt based previous condition
+}
+        // Asynchronous function to fetch data from the provided URL.
+        async function fetchData() {
+         const url = urlInput.value;
+         if (!url) {
+             //alert('Please enter a URL.');
+             showMessage("Please Enter URL",true) // shows the messages, it is error
+              return;  //important stops right aways
+           }
+         document.querySelector('.container').classList.add('loading'); // Show loader
+
+          fictionUrl = url; // Store for later use (linking in preview)
+
+        try {  //begins a block of try-catch statemtns
+             const metadata = await extractMetadata(url);
+
+            if(metadata){  //Check if metadata exits
+                //Populating those metadta that are extracted into UI, important handle null condition too
+             fictionTitleInput.value = metadata.title || '';
+             fictionDescriptionInput.value = metadata.blurb || '';
+              coverImageUrlInput.value = metadata.cover || '';
+
+              hasFetchedData = true; // VERY important flag
+              preview.classList.add('populated');  // Now it's safe to show.
+               updatePreview();  //Update after data fetch
+          }
+
+
+        } catch (error) { //catches any rrors
+            console.error('Error fetching metadata:', error);
+
+            //Clearing field incase data did not loads sucessfullly
+             fictionTitleInput.value = 'Error';        // Clear old values
+            fictionDescriptionInput.value = 'Error fetching data.';
+           coverImageUrlInput.value = "";
+            hasFetchedData = false;  // Reset in case of error
+
+        }
+        finally{ //it will executes always , error or sucess doesnt matter.
+          document.querySelector('.container').classList.remove('loading'); // Remove it always
+        }
+    }
+
+
+        // Function to copy the generated HTML to the clipboard.
+        function copyHtmlToClipboard() {
+
+            document.querySelector('.container').classList.add('copy-loading');  //Add it
+            let htmlContent = previewDesktop.innerHTML; //Get the displayed content
+
+            const tempDiv = document.createElement('div'); //temporay div not aoutput the result.
+            tempDiv.innerHTML = htmlContent; //use temporary div to manipulate content
+            // Include titleColor and selectedTitleFont in the table style.
+            const tableHtml = `
+            <!--Wraps up the all contnet of temdiv intor HTML table, before copying-->
+   <table style="border-collapse: collapse; width: 100%; overflow: hidden; background-color: ${bgColorInput.value}; color: ${textColorInput.value}; font-family: ${fontSelect.value};" border="0">
+    <tbody>
+        <tr>
+       <td>
+          ${tempDiv.innerHTML}
+            </td>
+         </tr>
+   </tbody>
+  </table>
+`;
+
+            const tempTableDiv = document.createElement('div'); //for storing table
+            tempTableDiv.innerHTML = tableHtml;
+
+            // NO cleanElements NEEDED
+
+               // Select and modify all img tags within tempTableDiv.
+            const images = tempTableDiv.querySelectorAll('img');
+            for (const img of images) {
+                img.style.maxWidth = '100px';
+                img.style.height = 'auto';
+            }
+
+
+            // Select the H2 within the *table* and apply inline styles.  CRUCIAL.
+            const h2Elements = tempTableDiv.querySelectorAll('h2'); //selecr h2 tags withn table only.
+            h2Elements.forEach(h2 => { // apply styles each oh h2
+                h2.style.fontFamily = titleFontSelect.value; // Use selected title font
+                h2.style.color = titleColorInput.value; // Use selected title color
+            });
+
+
+            navigator.clipboard.writeText(tempTableDiv.innerHTML) //Use the  method.
+                .then(() => {
+                    showSucessMessage("Copied Sucessfully!")
+                   //alert('HTML copied to clipboard!');
+                   setTimeout(hideMessage,2000); // hids afer showing messages after copiying it sucessfuully
+                })
+                .catch(err => {  // Handles failure condition
+                    console.error('Failed to copy: ', err);
+                  //alert('Failed to copy HTML to clipboard.'); // Give feedback
+                  showMessage("Error. Failed to Copy",true); // Show general error message
+              })
+            .finally(()=>{   //whether the prmoise gets fullfileld or reject this section gets executes.
+                  document.querySelector('.container').classList.remove('copy-loading'); //remvoe no maters what.
+                });
+        }
+
+
+    });
+</script>
+</body>
+</html>
