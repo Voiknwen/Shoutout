@@ -1,6 +1,6 @@
 ![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
-This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE
+This project is licensed under the Apache 2.0 License
 # Shoutout Creator
 
 This web application helps you create visually appealing shoutout codes for sharing your fiction on Royal Road.
