@@ -1,4 +1,4 @@
-![GPLv3 License](https://img.shields.io/badge/License-GPLv3-blue.svg)
+![Apache License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
 This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE
 # Shoutout Creator
